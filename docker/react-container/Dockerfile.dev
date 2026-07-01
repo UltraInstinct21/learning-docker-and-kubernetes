@@ -1,0 +1,16 @@
+# 1 Build production bundle
+
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json .
+RUN npm ci
+
+COPY . . 
+
+CMD ["npm", "start"]
+
+
+# docker run -d -p 3000:3000 -v ./public:/app/public -v ./src:/app/src  react-app:dev 
+# docker build -t react-app:dev -f Dockerfile.dev .
