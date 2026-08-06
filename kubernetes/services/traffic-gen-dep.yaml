@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: traffic-gen
+  labels:
+    app: traffic-gen
+spec:
+  containers:
+    - name: traffic-gen
+      image: ultrainstinct21/traffic-gen:1.0.0
+      args:
+        - "http://color-api-clusterip/api"
+        - "0.5"
+      ports:
+        - containerPort: 8080
