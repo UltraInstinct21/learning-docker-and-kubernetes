@@ -1,3 +1,36 @@
+# ==============================================================================
+# THEORY: STANDALONE POD vs REPLICASET ADOPTION
+# ==============================================================================
+# Standalone (unmanaged) pods:
+# - Created directly using `kind: Pod`.
+# - If a standalone pod crashes or the node fails, Kubernetes WILL NOT restart or
+#   reschedule it. There is no controller maintaining its lifecycle.
+#
+# POD ADOPTION BY REPLICASET:
+# - A ReplicaSet identifies its pods using Label Selectors (`spec.selector.matchLabels`).
+# - If this unmanaged pod (`sole-nginx` with label `app: nginx`) is running when a
+#   ReplicaSet with `replicas: 3` and selector `app: nginx` is created:
+#   1. The ReplicaSet controller detects this existing pod.
+#   2. It "adopts" `sole-nginx` by setting its `metadata.ownerReferences` to the ReplicaSet.
+#   3. Since 1 pod already matches, it will only create 2 more pods to satisfy desired=3.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Create the standalone pod:
+#    kubectl apply -f nginx-pod.yaml
+#
+# 2. Check pod details and owner reference (empty when standalone):
+#    kubectl get pod sole-nginx -o jsonpath='{.metadata.ownerReferences}'
+#
+# 3. Create ReplicaSet (see nginx-rs.yaml) and check owner reference again:
+#    kubectl apply -f nginx-rs.yaml
+#    kubectl get pod sole-nginx -o yaml | grep ownerReferences -A 5
+#
+# 4. Delete the standalone pod (ReplicaSet will immediately recreate a replacement):
+#    kubectl delete pod sole-nginx
+#    kubectl get pods -l app=nginx
+# ==============================================================================
+
 apiVersion: v1
 kind: Pod
 metadata: 

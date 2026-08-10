@@ -1,11 +1,62 @@
+# ==============================================================================
+# THEORY: KUBERNETES DEPLOYMENTS
+# ==============================================================================
+# A Deployment is a higher-level abstraction over ReplicaSets. It provides:
+# 1. Declarative updates for Pods and ReplicaSets.
+# 2. Automated Rollouts and Rollbacks with zero-downtime.
+# 3. Revision history tracking.
+# 4. Scaling and pausing capabilities.
+#
+# OBJECT HIERARCHY:
+#   Deployment  -->  ReplicaSet (creates a new RS per revision)  -->  Pods
+#
+# UPDATE STRATEGIES (`spec.strategy.type`):
+# - RollingUpdate (Default): Gradually replaces old pods with new pods.
+#   * maxSurge: Number/percent of pods that can run above desired count during update.
+#   * maxUnavailable: Number/percent of pods that can be unavailable during update.
+# - Recreate: Kills all existing pods before creating new ones (downtime occurs).
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Create/Apply Deployment:
+#    kubectl apply -f nginx-dep.yaml
+#
+# 2. Inspect Deployment & Replicas:
+#    kubectl get deployments
+#    kubectl get deploy -o wide
+#    kubectl describe deployment nginx-deployment
+#
+# 3. Scale Deployment:
+#    kubectl scale deployment nginx-deployment --replicas=5
+#
+# 4. Update Container Image (Triggers a Rolling Update):
+#    kubectl set image deployment/nginx-deployment nginx=nginx:1.25.0 --record
+#
+# 5. Monitor and Manage Rollouts:
+#    kubectl rollout status deployment/nginx-deployment   # Watch rollout progress
+#    kubectl rollout history deployment/nginx-deployment  # View revision history
+#    kubectl rollout history deployment/nginx-deployment --revision=2 # View details of revision
+#
+# 6. Rollback / Undo to Previous Revision:
+#    kubectl rollout undo deployment/nginx-deployment                 # Rollback to last revision
+#    kubectl rollout undo deployment/nginx-deployment --to-revision=1 # Rollback to specific revision
+#
+# 7. Pause and Resume Rollouts (Useful for batching changes):
+#    kubectl rollout pause deployment/nginx-deployment
+#    kubectl rollout resume deployment/nginx-deployment
+#
+# 8. Restart all pods in a deployment (Zero-downtime rolling restart):
+#    kubectl rollout restart deployment/nginx-deployment
+# ==============================================================================
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
   labels: 
     app: nginx
-    # annotation:
-    #   'kubernetes.io/change-cause': 'Deployment for Nginx'
+    # annotations:
+    #   kubernetes.io/change-cause: 'Deployment for Nginx'
 spec:
   replicas: 3
   selector:
@@ -23,3 +74,6 @@ spec:
             - containerPort: 80
   strategy:
     type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

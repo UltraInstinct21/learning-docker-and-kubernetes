@@ -1,12 +1,29 @@
+# ==============================================================================
+# THEORY: KEY-VALUE APP BACKEND (DEVELOPMENT DOCKERFILE)
+# ==============================================================================
+# A development container for the Node.js Express backend connected to MongoDB.
+# Used in combination with bind mounts (`-v ./backend/src:/app/src`) and `nodemon`
+# (via `npm run dev`) to enable instant hot-reloading on code edits.
+#
+# DOCKER CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Build image:
+#    docker build -t key-value-backend -f backend/Dockerfile.dev backend
+#
+# 2. Run standalone:
+#    docker run -d -p 3000:3000 --name backend key-value-backend
+# ==============================================================================
+
 FROM node:24-alpine
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm ci
 
 COPY . .
 
+EXPOSE 3000
 
 CMD ["npm", "run", "dev"]

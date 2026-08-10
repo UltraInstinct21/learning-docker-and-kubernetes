@@ -1,12 +1,24 @@
+# ==============================================================================
+# THEORY: DOCKER COMPOSE BACKEND SERVICE (DEVELOPMENT DOCKERFILE)
+# ==============================================================================
+# Node.js backend development container designed to be managed by Docker Compose.
+#
+# RUNTIME WORKFLOW:
+# - Used by `compose.yaml` under `services.backend.build`.
+# - File changes in `./backend/src` are synchronized into `/app/src` using Docker Compose Watch.
+# - Starts with `npm run dev` (using nodemon for automatic server restarts on file changes).
+# ==============================================================================
+
 FROM node:24-alpine
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm ci
 
 COPY . .
 
+EXPOSE 3000
 
 CMD ["npm", "run", "dev"]

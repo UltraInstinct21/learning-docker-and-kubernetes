@@ -1,4 +1,32 @@
+# ==============================================================================
+# THEORY: USING ENTRYPOINT ALONE
+# ==============================================================================
+# `ENTRYPOINT` configures a container that will run as an executable.
+#
+# CHARACTERISTICS:
+# - Command line arguments passed to `docker run <image> <args>` are ALWAYS
+#   appended to the ENTRYPOINT (rather than replacing it).
+#
+# EXAMPLE:
+# - Default: `docker run test-entrypoint` -> Runs `echo "Hello World from entrypoint"`
+# - With Args: `docker run test-entrypoint "Extra Param"`
+#   -> Runs `echo "Hello World from entrypoint" "Extra Param"`
+#
+# USEFUL DOCKER CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Build this image:
+#    docker build -t test-entrypoint -f Dockerfile.entrypoint .
+#
+# 2. Run with default ENTRYPOINT:
+#    docker run --rm test-entrypoint
+#    # Output: Hello World from entrypoint
+#
+# 3. Pass CLI arguments (notice arguments get appended):
+#    docker run --rm test-entrypoint "Appended text"
+#    # Output: Hello World from entrypoint Appended text
+# ==============================================================================
+
 FROM alpine:3.20
 
-
+# Exec form of ENTRYPOINT
 ENTRYPOINT ["echo", "Hello World from entrypoint"]

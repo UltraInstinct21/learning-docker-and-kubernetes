@@ -1,0 +1,59 @@
+# ==============================================================================
+# THEORY: NOTEBOOKS SERVICE DOCKER COMPOSE CONFIGURATION
+# ==============================================================================
+# Manages the `notebooks-backend` microservice and its dedicated MongoDB database.
+#
+# USEFUL COMPOSE CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Start notebooks backend and db:
+#    docker compose up -d
+#
+# 2. Start with live file watch / sync:
+#    docker compose watch
+#
+# 3. View logs:
+#    docker compose logs -f notebooks-dev
+#
+# 4. Stop and clean up:
+#    docker compose down -v
+# ==============================================================================
+
+name: notebooks-backend
+
+services:
+  notebooks-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:80"
+    environment:
+      - PORT=80
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+    networks:
+      - notebooks-net
+
+  notebooks-db:
+    image: mongodb/mongodb-community-server:7.0-ubuntu2204
+    env_file:
+      - .env
+    volumes:
+      - type: volume
+        source: notebooks-data
+        target: /data/db    
+      - type: bind
+        source: ./db-config/mongo-init.js  
+        target: /docker-entrypoint-initdb.d/mongo-init.js
+        read_only: true  
+    networks:  
+      - notebooks-net
+
+volumes:   
+  notebooks-data:
+
+networks:
+  notebooks-net:

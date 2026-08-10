@@ -1,10 +1,49 @@
+# ==============================================================================
+# THEORY: IMAGE OPTIMIZATION - INSTRUCTION ORDERING & LAYER CACHING
+# ==============================================================================
+# Docker executes Dockerfile instructions sequentially from top to bottom.
+#
+# HOW LAYER CACHING WORKS:
+# 1. Each instruction (`FROM`, `WORKDIR`, `COPY`, `RUN`) creates a cached layer.
+# 2. When rebuilding an image, if a step and its inputs haven't changed, Docker reuses
+#    the cached layer instantly (`---> Using cache`).
+# 3. CRITICAL RULE: If a layer cache is invalidated (e.g. source file modified in COPY),
+#    EVERY SUBSEQUENT LAYER below it must be rebuilt from scratch!
+#
+# BAD ORDER (SLOW BUILDS):
+#   COPY . .              # Changes frequently! Invalidates cache every code edit
+#   RUN npm ci            # Re-downloads 500MB of dependencies on every single edit!
+#
+# GOOD ORDER (FAST BUILDS):
+#   COPY package*.json .  # Only changes when dependencies are added/updated
+#   RUN npm ci            # Cached 99% of the time!
+#   COPY index.js .       # Changes frequently, but takes only 1ms to rebuild
+#
+# USEFUL DOCKER CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Build initial image:
+#    docker build -t app:ordered -f Dockerfile.order .
+#
+# 2. Edit index.js and rebuild (Notice npm ci is skipped via CACHE):
+#    docker build -t app:ordered -f Dockerfile.order .
+#
+# 3. Build without cache (force full rebuild):
+#    docker build --no-cache -t app:ordered -f Dockerfile.order .
+# ==============================================================================
+
 FROM node:22-alpine
+
 WORKDIR /app
 
+# Step 1: Copy only dependency manifests (changes rarely)
 COPY package*.json .
 
+# Step 2: Install dependencies (expensive, but cached if package*.json hasn't changed)
 RUN npm ci
 
+# Step 3: Copy frequently changing application source code last
 COPY index.js index.js
+
+EXPOSE 3000
 
 CMD ["node", "index.js"]

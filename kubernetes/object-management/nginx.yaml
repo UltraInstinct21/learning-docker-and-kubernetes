@@ -1,3 +1,37 @@
+# ==============================================================================
+# THEORY: DECLARATIVE MULTI-OBJECT MANAGEMENT
+# ==============================================================================
+# In Kubernetes, multiple object specifications can be combined into a single YAML
+# file using the YAML document separator `---`.
+#
+# DECLARATIVE vs IMPERATIVE:
+# - Imperative (kubectl create / replace):
+#   * `kubectl create`: Creates a new object; errors if it already exists.
+#   * `kubectl replace`: Replaces an existing object entirely.
+# - Declarative (kubectl apply):
+#   * Reads the current live configuration, computes a 3-way diff (previous applied,
+#     live object, and new manifest), and applies incremental changes.
+#   * Stores the last-applied-configuration annotation on the object.
+#   * Recommended for production and GitOps workflows.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply multi-document manifest:
+#    kubectl apply -f nginx.yaml
+#
+# 2. Apply all manifests in the current directory:
+#    kubectl apply -f .
+#
+# 3. View differences between local file and cluster state (Diff):
+#    kubectl diff -f nginx.yaml
+#
+# 4. Delete all resources defined in this file:
+#    kubectl delete -f nginx.yaml
+#
+# 5. List all resources in current namespace:
+#    kubectl get all
+# ==============================================================================
+
 apiVersion: v1
 kind: Pod
 metadata:
@@ -27,6 +61,3 @@ spec:
       port: 80
       targetPort: 80
   type: NodePort
-
-
-

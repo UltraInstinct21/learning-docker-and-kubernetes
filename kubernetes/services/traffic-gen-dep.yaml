@@ -1,3 +1,35 @@
+# ==============================================================================
+# THEORY: IN-CLUSTER SERVICE CONSUMPTION & LOAD BALANCING DEMO
+# ==============================================================================
+# This Pod runs a continuous traffic generator script inside the cluster.
+#
+# PURPOSE:
+# 1. Sends HTTP GET requests every 0.5s to the ClusterIP Service:
+#    `http://color-api-clusterip/api`
+# 2. Demonstrates CoreDNS resolving the service name `color-api-clusterip`.
+# 3. Demonstrates Service Load Balancing: Because `color-api-deployment` has 5 replicas,
+#    viewing logs of this pod shows responses returning different hostnames across
+#    all 5 backend pods in round-robin fashion!
+#
+# CONTAINER ARGS vs COMMAND:
+# - `args` in Kubernetes overrides the Dockerfile `CMD` (or appends to `ENTRYPOINT`).
+# - Here, args provide [TARGET_URL] and [INTERVAL_SECONDS] to `traffic-gen.sh`.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Traffic Generator Pod:
+#    kubectl apply -f traffic-gen-dep.yaml
+#
+# 2. Watch load-balanced traffic in real-time (Notice alternating hostnames!):
+#    kubectl logs -f traffic-gen
+#
+# 3. Check logs of the last 20 requests:
+#    kubectl logs --tail=20 traffic-gen
+#
+# 4. Delete Traffic Generator:
+#    kubectl delete -f traffic-gen-dep.yaml
+# ==============================================================================
+
 apiVersion: v1
 kind: Pod
 metadata:

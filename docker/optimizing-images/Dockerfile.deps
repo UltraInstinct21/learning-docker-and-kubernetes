@@ -1,10 +1,38 @@
+# ==============================================================================
+# THEORY: IMAGE OPTIMIZATION - PRUNING DEV DEPENDENCIES
+# ==============================================================================
+# In production containers, `devDependencies` (such as TypeScript, Jest, ESLint,
+# nodemon, Webpack, etc.) are unnecessary and inflate image size and security risks.
+#
+# STRATEGY:
+# Use `npm ci --only=production` (or `npm ci --omit=dev`) to install ONLY the
+# packages listed under `"dependencies"` in `package.json`.
+#
+# BENEFITS:
+# 1. Smaller image size (saves tens to hundreds of megabytes).
+# 2. Faster image pull times in Kubernetes and CI/CD pipelines.
+# 3. Reduced vulnerability count in container security scans.
+#
+# USEFUL DOCKER CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Build production-only dependencies image:
+#    docker build -t app:prod-deps -f Dockerfile.deps .
+#
+# 2. Compare size against development image:
+#    docker images | grep app
+# ==============================================================================
+
 FROM node:22-alpine
+
 WORKDIR /app
 
 COPY package*.json .
 
+# Install ONLY production dependencies, skipping devDependencies
 RUN npm ci --only=production
 
 COPY index.js index.js
+
+EXPOSE 3000
 
 CMD ["node", "index.js"]

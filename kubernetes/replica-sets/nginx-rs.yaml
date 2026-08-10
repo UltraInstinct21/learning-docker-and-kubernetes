@@ -1,3 +1,45 @@
+# ==============================================================================
+# THEORY: KUBERNETES REPLICASET
+# ==============================================================================
+# A ReplicaSet's primary purpose is to maintain a stable set of replica Pods running
+# at any given time. It acts as a self-healing mechanism:
+# - If a Pod crashes or is deleted, the ReplicaSet creates a new one.
+# - If extra matching Pods are manually created, the ReplicaSet terminates excess Pods.
+#
+# KEY COMPONENTS:
+# 1. apiVersion: `apps/v1` (Note: `app/v1` or `extensions/v1beta1` are deprecated/invalid).
+# 2. replicas: Desired number of Pod instances.
+# 3. selector (matchLabels): Defines how the ReplicaSet finds which Pods to manage.
+# 4. template: The Pod specification used when the ReplicaSet needs to create new Pods.
+#    * RULE: `template.metadata.labels` MUST match `spec.selector.matchLabels`.
+#
+# NOTE ON DEPLOYMENTS:
+# In modern Kubernetes, you rarely create ReplicaSets directly. Instead, you create
+# Deployments, which manage ReplicaSets automatically (providing declarative updates
+# and rollbacks).
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Create/Apply ReplicaSet:
+#    kubectl apply -f nginx-rs.yaml
+#
+# 2. Inspect ReplicaSets:
+#    kubectl get rs
+#    kubectl get replicasets
+#    kubectl describe rs nginx-replica-set
+#
+# 3. Scale the ReplicaSet:
+#    kubectl scale rs nginx-replica-set --replicas=5
+#
+# 4. Test Self-Healing (Delete one pod, watch ReplicaSet recreate it):
+#    kubectl delete pod <pod-name>
+#    kubectl get pods -w
+#
+# 5. Cascading vs Non-Cascading Deletion:
+#    kubectl delete rs nginx-replica-set                  # Deletes RS and all its Pods
+#    kubectl delete rs nginx-replica-set --cascade=orphan # Deletes RS but leaves Pods running
+# ==============================================================================
+
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
