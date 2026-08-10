@@ -1,3 +1,41 @@
+# ==============================================================================
+# THEORY: KUBERNETES SERVICE - CLUSTERIP
+# ==============================================================================
+# ClusterIP is the default Service type in Kubernetes.
+#
+# KEY CONCEPTS:
+# 1. Internal Virtual IP: Kubernetes assigns a stable IP address from the cluster's
+#    Service CIDR range. This IP is only routable INSIDE the cluster.
+# 2. Service Discovery (CoreDNS): Kubernetes automatically creates a DNS record:
+#    - Same namespace: `http://color-api-clusterip`
+#    - Cross-namespace: `http://color-api-clusterip.<namespace>.svc.cluster.local`
+# 3. Load Balancing: `kube-proxy` configures iptables/IPVS rules to load balance
+#    traffic sent to ClusterIP across the backing Pod Endpoints.
+#
+# PORTS EXPLANATION:
+# - `port`: 80 -> The port exposed on the Service's internal IP.
+# - `targetPort`: 80 -> The port listening inside the container.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply ClusterIP Service:
+#    kubectl apply -f color-api-clusterip.yaml
+#
+# 2. Inspect Service and assigned ClusterIP:
+#    kubectl get svc color-api-clusterip
+#    kubectl describe svc color-api-clusterip
+#
+# 3. Inspect the backend Endpoints (list of active Pod IPs):
+#    kubectl get endpoints color-api-clusterip
+#
+# 4. Test connectivity from inside the cluster using a temporary debug pod:
+#    kubectl run curl-test --rm -it --image=curlimages/curl -- curl http://color-api-clusterip/api
+#
+# 5. Access ClusterIP from local machine using Port Forwarding:
+#    kubectl port-forward svc/color-api-clusterip 8080:80
+#    curl http://localhost:8080/api
+# ==============================================================================
+
 apiVersion: v1
 kind: Service
 metadata:

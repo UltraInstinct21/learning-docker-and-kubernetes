@@ -1,3 +1,44 @@
+# ==============================================================================
+# THEORY: KUBERNETES OBJECT MANAGEMENT - PODS
+# ==============================================================================
+# A Pod is the smallest, most basic deployable unit in Kubernetes.
+# It represents a single instance of a running process in your cluster.
+# A Pod encapsulates one or more containers (tightly coupled), storage resources,
+# a unique network IP (Pod IP), and options that govern container execution.
+#
+# OBJECT MANAGEMENT APPROACHES:
+# 1. Imperative Commands: Operating directly on live objects (e.g., kubectl run)
+# 2. Imperative Object Configuration: Specifying operations via files (e.g., kubectl create -f file.yaml)
+# 3. Declarative Object Configuration: Specifying desired state via files (e.g., kubectl apply -f file.yaml)
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Create Pod imperatively (without YAML):
+#    kubectl run nginx-pod --image=nginx:latest --port=80 --labels="app=nginx"
+#
+# 2. Generate YAML template without creating the object (Dry Run):
+#    kubectl run nginx-pod --image=nginx:latest --port=80 --dry-run=client -o yaml > nginx-pod.yaml
+#
+# 3. Create/Apply from YAML:
+#    kubectl create -f nginx-pod.yaml   # Imperative (fails if object already exists)
+#    kubectl apply -f nginx-pod.yaml    # Declarative (creates or updates)
+#
+# 4. Inspect Pod:
+#    kubectl get pods
+#    kubectl get pods -o wide           # Shows Pod IP and assigned Node
+#    kubectl describe pod nginx-pod     # Shows detailed info, status & events
+#
+# 5. Access and Debug Pod:
+#    kubectl logs nginx-pod             # View container stdout/stderr logs
+#    kubectl logs -f nginx-pod          # Stream logs in real-time
+#    kubectl exec -it nginx-pod -- sh   # Open an interactive shell inside container
+#    kubectl port-forward pod/nginx-pod 8080:80 # Forward local port 8080 to pod port 80
+#
+# 6. Delete Pod:
+#    kubectl delete pod nginx-pod
+#    kubectl delete -f nginx-pod.yaml
+# ==============================================================================
+
 apiVersion: v1
 kind: Pod
 metadata:

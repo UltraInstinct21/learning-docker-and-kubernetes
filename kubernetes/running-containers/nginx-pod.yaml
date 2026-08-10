@@ -1,0 +1,50 @@
+# ==============================================================================
+# THEORY: BASIC POD SPECIFICATION
+# ==============================================================================
+# A minimal declarative pod definition demonstrating environment variables,
+# resource limits/requests, and container port mapping.
+#
+# FIELDS OVERVIEW:
+# - apiVersion: Core API group version (`v1`).
+# - kind: Object type (`Pod`).
+# - metadata: Identifying data (name, namespace, labels).
+# - spec.containers: Array of container specs running within this pod.
+# - spec.containers[].resources:
+#   * requests: Minimum compute resources guaranteed by the scheduler.
+#   * limits: Hard upper cap enforced by cgroups.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Pod manifest:
+#    kubectl apply -f nginx-pod.yaml
+#
+# 2. Check resource consumption:
+#    kubectl top pod nginx-example
+#
+# 3. Port forward to access container:
+#    kubectl port-forward pod/nginx-example 8080:80
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-example
+  labels:
+    app: web-server
+    environment: learning
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      env:
+        - name: APP_ENV
+          value: "development"
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "50m"
+        limits:
+          memory: "128Mi"
+          cpu: "100m"

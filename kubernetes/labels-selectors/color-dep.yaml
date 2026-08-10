@@ -1,0 +1,74 @@
+# ==============================================================================
+# THEORY: ADVANCED SELECTORS (matchLabels & matchExpressions)
+# ==============================================================================
+# Deployment and ReplicaSet controllers use `.spec.selector` to identify which Pods
+# belong to the workload.
+#
+# TWO SELECTION MECHANISMS:
+# 1. matchLabels:
+#    - Map of key/value pairs (equality-based).
+#    - All key/value conditions must match (AND logic).
+#
+# 2. matchExpressions:
+#    - List of pod selector requirements (set-based).
+#    - Valid operators:
+#      * In: The label value must be in the specified list of values.
+#      * NotIn: The label value must NOT be in the specified list of values.
+#      * Exists: The label key must exist on the pod (values field must NOT be set).
+#      * DoesNotExist: The label key must NOT exist on the pod.
+#
+# COMBINING SELECTORS:
+# - Both `matchLabels` and `matchExpressions` are evaluated with logical AND.
+# - CRITICAL: The Pod template (`spec.template.metadata.labels`) MUST satisfy ALL
+#   conditions in both `matchLabels` and `matchExpressions`.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Deployment:
+#    kubectl apply -f color-dep.yaml
+#
+# 2. View pods managed by this deployment:
+#    kubectl get pods -l app=color-api -L tier,managed,release
+#
+# 3. Filter using matchExpressions equivalent in CLI:
+#    kubectl get pods -l 'managed,tier in (frontend,backend)'
+#
+# 4. View Deployment Selector details:
+#    kubectl describe deployment color-api | grep "Selector:"
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: color-api
+  labels:
+    app: color-api
+    environment: local
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: color-api
+      environment: local
+      tier: backend
+    matchExpressions:
+      - key: managed
+        operator: Exists
+      - key: tier
+        operator: In
+        values: [frontend, backend]
+  template:
+    metadata:
+      labels:
+        app: color-api
+        environment: local
+        tier: backend
+        release: stable
+        managed: 'true'
+    spec:
+      containers:
+      - name: color-api
+        image: ultrainstinct21/color-api:1.1.0
+        ports:
+        - containerPort: 80

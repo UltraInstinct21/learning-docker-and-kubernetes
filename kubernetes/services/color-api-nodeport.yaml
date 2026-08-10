@@ -1,3 +1,42 @@
+# ==============================================================================
+# THEORY: KUBERNETES SERVICE - NODEPORT
+# ==============================================================================
+# NodePort exposes the Service on each Node's IP at a static port (range 30000-32767).
+# It builds on top of ClusterIP (a ClusterIP is also automatically created).
+#
+# TRAFFIC FLOW:
+#   External Client --> <NodeIP>:<NodePort (30007)>
+#                   --> Kube-Proxy / Iptables
+#                   --> ClusterIP Service
+#                   --> Pod IP : <targetPort (80)>
+#
+# PORTS EXPLANATION:
+# - `port`: 80 -> Internal Service port inside cluster.
+# - `targetPort`: 80 -> Container port inside Pod.
+# - `nodePort`: 30007 -> Port opened externally on ALL cluster nodes (30000-32767).
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply NodePort Service:
+#    kubectl apply -f color-api-nodeport.yaml
+#
+# 2. Inspect NodePort Service:
+#    kubectl get svc color-api-nodeport
+#    kubectl describe svc color-api-nodeport
+#
+# 3. Get Node IPs to access the service externally:
+#    kubectl get nodes -o wide
+#
+# 4. Access via Minikube:
+#    minikube ip                                    # Get Minikube VM IP
+#    curl http://$(minikube ip):30007/api           # Access via Node IP & NodePort
+#    minikube service color-api-nodeport --url      # Returns direct URL
+#    minikube service color-api-nodeport            # Opens in browser
+#
+# 5. Delete Service:
+#    kubectl delete -f color-api-nodeport.yaml
+# ==============================================================================
+
 apiVersion: v1
 kind: Service
 metadata:

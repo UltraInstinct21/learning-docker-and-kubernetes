@@ -1,4 +1,55 @@
+# ==============================================================================
+# THEORY: DOCKER COMPOSE SPECIFICATION
+# ==============================================================================
+# Docker Compose is a tool for defining and running multi-container Docker applications.
+# With Compose, you use a YAML file to configure application services, networks,
+# and volumes declaratively.
+#
+# KEY DIRECTIVES:
+# 1. `services`: Defines the individual containers that make up your application.
+#    - `build`: Builds an image from a local Dockerfile context.
+#    - `image`: Uses a pre-built image from a container registry.
+#    - `ports`: Maps `<HostPort>:<ContainerPort>`.
+#    - `env_file`: Injects variables from `.env` files.
+#    - `environment`: Sets environment variables inline (overrides env_file).
+#    - `depends_on`: Expresses startup dependency order between services.
+#    - `networks`: Connects service containers to a shared bridge network.
+# 2. `develop.watch` (Docker Compose Watch):
+#    - Automatically synchronizes host source code changes into the container (`action: sync`)
+#      or rebuilds the image on dependency changes (`action: rebuild`) without restarting.
+# 3. `volumes`: Defines named persistent storage volumes.
+# 4. `networks`: Defines isolated custom bridge networks.
+#
+# USEFUL DOCKER COMPOSE CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Start all services in detached mode (builds if images do not exist):
+#    docker compose up -d
+#
+# 2. Build or force rebuild images:
+#    docker compose build
+#    docker compose up -d --build
+#
+# 3. Start with Docker Compose Watch (live file sync):
+#    docker compose watch
+#
+# 4. View status of compose services:
+#    docker compose ps
+#
+# 5. View aggregated logs:
+#    docker compose logs -f
+#    docker compose logs -f backend   # Follow specific service logs
+#
+# 6. Execute command inside a running service:
+#    docker compose exec backend sh
+#    docker compose exec db mongosh -u root-user -p root-password
+#
+# 7. Stop and remove all containers, networks, and named volumes:
+#    docker compose down              # Preserves volumes
+#    docker compose down -v           # Deletes volumes as well (fresh start)
+# ==============================================================================
+
 name: key-value-app
+
 services:
   backend:
     build: 
@@ -22,7 +73,6 @@ services:
           target: /app/src
           ignore:
             - node_modules
-          
 
   db:
     image: mongodb/mongodb-community-server:latest
@@ -41,12 +91,9 @@ services:
         target: /data/db
     networks:
       - key-value-net
-    
-
 
 volumes:
   mongo-data:
 
 networks:
   key-value-net:
-    

@@ -1,4 +1,32 @@
+# ==============================================================================
+# THEORY: IMAGE OPTIMIZATION - BASE IMAGE SELECTION & SIZE
+# ==============================================================================
+# Choosing the right base image drastically reduces image size, network transfer times,
+# and attack surface (fewer installed packages and vulnerabilities).
+#
+# IMAGE COMPARISON FOR NODE.JS:
+# 1. `node:22` (Full / Debian-based): ~1.1 GB
+#    - Contains full build tools (gcc, python), package managers, libraries.
+# 2. `node:22-slim`: ~220 MB
+#    - Minimal Debian installation; contains only the bare minimum to run Node.
+# 3. `node:22-alpine`: ~140 MB
+#    - Based on Alpine Linux (uses musl libc and busybox). Extremely compact and secure.
+#
+# USEFUL DOCKER CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Build and compare image sizes:
+#    docker build -t app:alpine -f Dockerfile.size .
+#
+# 2. List and compare image sizes:
+#    docker images app:alpine
+#
+# 3. Inspect image layers and history to find where size comes from:
+#    docker history app:alpine
+# ==============================================================================
+
+# Using lightweight Alpine base image instead of full Node image
 FROM node:22-alpine
+
 WORKDIR /app
 
 COPY package*.json .
@@ -6,5 +34,7 @@ COPY package*.json .
 RUN npm ci
 
 COPY index.js index.js
+
+EXPOSE 3000
 
 CMD ["node", "index.js"]

@@ -1,3 +1,46 @@
+# ==============================================================================
+# THEORY: KUBERNETES OBJECT MANAGEMENT - SERVICES
+# ==============================================================================
+# Pods are ephemeral (they get dynamically created and destroyed with changing IPs).
+# A Service provides a stable, fixed network endpoint (DNS & IP) and load balances
+# traffic across a set of Pods identified by label selectors.
+#
+# SERVICE TYPES:
+# 1. ClusterIP (Default): Accessible ONLY inside the cluster network.
+# 2. NodePort: Exposes the Service on each Node's IP at a static port (30000-32767).
+# 3. LoadBalancer: Provisions a cloud provider's external load balancer (AWS ELB, GCP LB).
+# 4. ExternalName: Maps the Service to a DNS name (CNAME record) without proxying.
+#
+# PORT DEFINITIONS:
+# - port: The port exposed internally on the Service itself (accessed by other pods).
+# - targetPort: The actual port listening inside the container in the target Pod.
+# - nodePort: (Optional for NodePort type) The port allocated on every node (30000-32767).
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Create Service imperatively by exposing an existing Pod:
+#    kubectl expose pod nginx-pod --name=nginx-service --type=NodePort --port=80 --target-port=80
+#
+# 2. Generate Service YAML template (Dry Run):
+#    kubectl expose pod nginx-pod --name=nginx-service --type=NodePort --port=80 --dry-run=client -o yaml > nginx-service.yaml
+#
+# 3. Apply/Create Service:
+#    kubectl apply -f nginx-service.yaml
+#
+# 4. Inspect Service and Endpoints:
+#    kubectl get svc
+#    kubectl get svc nginx-service -o wide
+#    kubectl describe svc nginx-service         # Check Endpoints to verify target pods are matched
+#    kubectl get endpoints nginx-service        # Shows active Pod IPs backing this service
+#
+# 5. Accessing NodePort in Minikube:
+#    minikube service nginx-service --url       # Prints URL or opens in browser
+#
+# 6. Delete Service:
+#    kubectl delete svc nginx-service
+#    kubectl delete -f nginx-service.yaml
+# ==============================================================================
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -12,6 +55,3 @@ spec:
       port: 80
       targetPort: 80
   type: NodePort
-
-
-# kubectl expose pod nginx-pod --type=NodePort --port=80

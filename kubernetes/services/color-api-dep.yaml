@@ -1,3 +1,31 @@
+# ==============================================================================
+# THEORY: KUBERNETES SERVICES - BACKEND WORKLOAD (DEPLOYMENT)
+# ==============================================================================
+# This Deployment runs 5 replicas of the `color-api` service.
+#
+# PURPOSE IN SERVICE DEMOS:
+# - Each pod has a unique Pod IP and hostname.
+# - When exposed via a Kubernetes Service (ClusterIP or NodePort), the Service
+#   automatically discovers all 5 pods via selector `app: color-api` and creates
+#   an Endpoints object containing all 5 Pod IPs.
+# - Requests sent to the Service are load-balanced across all healthy Pods.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply the backend Deployment:
+#    kubectl apply -f color-api-dep.yaml
+#
+# 2. View all 5 pods and their individual IPs:
+#    kubectl get pods -l app=color-api -o wide
+#
+# 3. Check endpoints created for services targeting this deployment:
+#    kubectl get endpoints
+#
+# 4. Scale up or down to observe automatic Endpoints update:
+#    kubectl scale deployment color-api-deployment --replicas=8
+#    kubectl get endpoints color-api-clusterip
+# ==============================================================================
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:

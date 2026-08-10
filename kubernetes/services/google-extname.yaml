@@ -1,3 +1,36 @@
+# ==============================================================================
+# THEORY: KUBERNETES SERVICE - EXTERNALNAME
+# ==============================================================================
+# ExternalName is a special Service type that maps a Service name to an external DNS
+# name (CNAME record) in CoreDNS rather than using label selectors or Pod IPs.
+#
+# KEY CHARACTERISTICS:
+# 1. No Selectors or Endpoints: It does NOT select pods or manage Endpoints.
+# 2. No Proxying / IP Allocation: Kube-proxy does not route traffic or assign a ClusterIP.
+# 3. Pure DNS CNAME: When a pod queries `google-extname`, CoreDNS returns a CNAME
+#    record pointing to `google.com`.
+#
+# USE CASES:
+# - Accessing external databases (e.g. AWS RDS, MongoDB Atlas) with a fixed internal name.
+# - Accessing third-party APIs without hardcoding external hostnames in app code.
+# - Decoupling environment differences (e.g. dev points to internal DB pod, prod points
+#   to external managed DB via ExternalName).
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply ExternalName Service:
+#    kubectl apply -f google-extname.yaml
+#
+# 2. Inspect Service:
+#    kubectl get svc google-extname
+#
+# 3. Test DNS resolution from inside cluster using nslookup:
+#    kubectl run dnsutils --rm -it --image=infoblox/dnstools -- nslookup google-extname
+#
+# 4. Test HTTP request from inside cluster:
+#    kubectl run curl-test --rm -it --image=curlimages/curl -- curl -I https://google-extname
+# ==============================================================================
+
 apiVersion: v1
 kind: Service
 metadata:

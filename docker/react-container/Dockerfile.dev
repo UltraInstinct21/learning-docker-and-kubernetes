@@ -1,16 +1,47 @@
-# 1 Build production bundle
+# ==============================================================================
+# THEORY: DOCKER FOR REACT DEVELOPMENT (HOT RELOADING)
+# ==============================================================================
+# In development, rebuilding the Docker image on every single React code change is slow.
+#
+# STRATEGY:
+# 1. Install dependencies inside the image during `docker build`.
+# 2. At runtime (`docker run`), use Bind Mounts (`-v`) to mount the host's `src/` and `public/`
+#    directories directly into the container.
+# 3. Webpack / Vite / React Dev Server detects file changes on the host instantly
+#    and updates the browser via Hot Module Replacement (HMR) without rebuilding the image!
+#
+# USEFUL DOCKER CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Build the development image:
+#    docker build -t react-app:dev -f Dockerfile.dev .
+#
+# 2. Run container with Bind Mounts for live source code sync:
+#    docker run -d -p 3000:3000 \
+#      -v $(pwd)/public:/app/public \
+#      -v $(pwd)/src:/app/src \
+#      -v /app/node_modules \
+#      --name react-dev react-app:dev
+#
+#    Note: `-v /app/node_modules` is an anonymous volume preventing host's empty
+#    node_modules from overriding container's installed node_modules.
+#
+# 3. Stream development server logs:
+#    docker logs -f react-dev
+# ==============================================================================
 
-FROM node:22-alpine AS builder
+FROM node:22-alpine AS dev
 
 WORKDIR /app
 
-COPY package*.json .
+# Copy package manifests first for caching
+COPY package*.json ./
+
 RUN npm ci
 
+# Copy initial source code
 COPY . . 
 
+EXPOSE 3000
+
+# Start React development server
 CMD ["npm", "start"]
-
-
-# docker run -d -p 3000:3000 -v ./public:/app/public -v ./src:/app/src  react-app:dev 
-# docker build -t react-app:dev -f Dockerfile.dev .
