@@ -11,7 +11,7 @@ Each instruction in a Dockerfile generates an intermediate layer. When rebuildin
 
 Order instructions from **least frequently changed** to **most frequently changed**.
 
-### ❌ Inefficient Ordering (Breaks Cache Constantly)
+### Inefficient Ordering (Breaks Cache Constantly)
 ```dockerfile
 FROM node:22-alpine
 WORKDIR /app
@@ -20,7 +20,7 @@ RUN npm ci          # ...forcing a full 2-minute npm download every single build
 CMD ["node", "index.js"]
 ```
 
-### ✅ Optimized Ordering (Utilizes Cache)
+### Optimized Ordering (Utilizes Cache)
 ```dockerfile
 FROM node:22-alpine
 WORKDIR /app
