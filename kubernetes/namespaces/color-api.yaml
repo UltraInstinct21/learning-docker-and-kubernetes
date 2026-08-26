@@ -1,0 +1,58 @@
+# ==============================================================================
+# THEORY: NAMESPACED POD & SERVICE DEPLOYMENT
+# ==============================================================================
+# In Kubernetes, both Pods and Services can be deployed directly into a specific
+# namespace by setting `metadata.namespace`.
+#
+# KEY CONCEPTS:
+# 1. Namespace Scope: Setting `metadata.namespace: dev` ensures this Pod and Service
+#    are isolated within the 'dev' namespace environment.
+# 2. In-Cluster DNS Naming:
+#    - CoreDNS registers this service under: color-api-svc.dev.svc.cluster.local
+#    - Pods inside 'dev' namespace can reach it via: http://color-api-svc
+#    - Pods outside 'dev' namespace can reach it via: http://color-api-svc.dev
+# 3. Context Switching:
+#    - Run `kubectl config set-context --current --namespace=dev` to make 'dev'
+#      the default namespace for your CLI session so you don't need `-n dev`.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Manifest to 'dev' namespace:
+#    kubectl apply -f color-api.yaml
+#
+# 2. Get Pods and Services in 'dev' namespace:
+#    kubectl get pods,svc -n dev
+#    kubectl get all -n dev
+#
+# 3. Port-Forward Service locally:
+#    kubectl port-forward svc/color-api-svc 8080:80 -n dev
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: color-api
+  namespace: dev # Deploys Pod explicitly into the 'dev' namespace
+  labels:
+    app: color-api
+spec:
+  containers:
+  - name: color-api
+    image: ultrainstinct21/color-api:1.1.0
+    ports:
+    - containerPort: 80 # Application container port
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: color-api-svc
+  namespace: dev # Deploys ClusterIP Service explicitly into 'dev' namespace
+spec:
+  type: ClusterIP # Internal cluster-only load balancing IP
+  selector:
+    app: color-api # Routes traffic to Pods matching app=color-api label in 'dev'
+  ports:
+  - port: 80        # Service cluster port
+    targetPort: 80  # Target container port on Pod

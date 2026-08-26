@@ -41,6 +41,8 @@ This repository is structured as an interactive curriculum pairing in-depth theo
 | **06** | **Deployments & Rollouts** | `RollingUpdate` vs `Recreate`, `maxSurge`/`maxUnavailable`, rollout history & rollbacks | [Read Theory](kubernetes/theory/06-deployments-and-rollouts.md) | [`deployments/`](kubernetes/deployments/nginx-dep.yaml) |
 | **07** | **Services & Networking** | In-cluster DNS discovery, `ClusterIP`, `NodePort`, `LoadBalancer`, `ExternalName` | [Read Theory](kubernetes/theory/07-services-and-networking.md) | [`services/`](kubernetes/services/) |
 | **08** | **End-to-End Microservices Demo** | Automated load balancing demo with `color-api` microservice and `traffic-generator` | [Read Theory](kubernetes/theory/08-end-to-end-microservices-demo.md) | [`traffic-generator/`](kubernetes/traffic-generator/) |
+| **09** | **Namespaces & Cross-Namespace Communication** | Virtual clusters, scope isolation, CoreDNS FQDN resolution (`<service>.<namespace>.svc.cluster.local`) | [Read Theory](kubernetes/theory/09-namespaces-and-cross-namespace-networking.md) | [`namespaces/`](kubernetes/namespaces/) |
+| **10** | **Resource Requests, Limits & Quotas** | Container CPU/Memory requests & limits, QoS classes (`Guaranteed`, `Burstable`, `BestEffort`), `ResourceQuota` | [Read Theory](kubernetes/theory/10-resource-requests-limits-and-quotas.md) | [`resource-quotas/`](kubernetes/resource-quotas/) |
 
 </details>
 
@@ -72,7 +74,9 @@ This repository is structured as an interactive curriculum pairing in-depth theo
     ├── labels-selectors/              # Equality & set-based matchExpressions
     ├── services/                      # ClusterIP, NodePort, and ExternalName services
     ├── color-api/                     # Demo Express microservice for service load balancing
-    └── traffic-generator/             # Automated in-cluster traffic generator
+    ├── traffic-generator/             # Automated in-cluster traffic generator
+    ├── namespaces/                    # Namespace creation, context switching & cross-namespace DNS
+    └── resource-quotas/               # CPU/RAM requests, limits, QoS & namespace ResourceQuotas
 ```
 
 ---

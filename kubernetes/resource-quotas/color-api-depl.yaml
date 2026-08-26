@@ -1,0 +1,64 @@
+# ==============================================================================
+# THEORY: DEPLOYMENTS & RESOURCE QUOTA CALCULATION
+# ==============================================================================
+# When managing Deployments inside a namespace protected by a ResourceQuota,
+# the total cumulative requests across all replicas must fit within the quota.
+#
+# QUOTA MATH DEMONSTRATION:
+# 1. Deployment Configuration:
+#    - Replicas: 4 Pods
+#    - Per-Pod Request: cpu: 200m (0.2 CPU), memory: 256Mi
+#    - Per-Pod Limit: cpu: 500m (0.5 CPU), memory: 512Mi
+#
+# 2. Total Deployment Consumption:
+#    - Aggregate CPU Request: 4 replicas * 200m = 800m CPU (0.8 Cores)
+#    - Aggregate Memory Request: 4 replicas * 256Mi = 1024Mi RAM (1 GiB)
+#    - Aggregate CPU Limit: 4 replicas * 500m = 2000m CPU (2 Cores)
+#    - Aggregate Memory Limit: 4 replicas * 512Mi = 2048Mi RAM (2 GiB)
+#
+# 3. Namespace ResourceQuota ('dev-quota'):
+#    - Quota Request Limits: requests.cpu: 1 (1000m), requests.memory: 1Gi (1024Mi)
+#    - Quota Upper Limits: limits.cpu: 2 (2000m), limits.memory: 2Gi (2048Mi)
+#    - STATUS: 800m <= 1000m CPU and 1024Mi <= 1024Mi RAM -> Valid! Fits perfectly!
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Deployment:
+#    kubectl apply -f color-api-depl.yaml
+#
+# 2. Check Quota Usage after deployment:
+#    kubectl describe resourcequota dev-quota -n dev
+#
+# 3. Test Scaling Beyond Quota Limit (will trigger quota exceeded error):
+#    kubectl scale deployment color-api-depl --replicas=6 -n dev
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: color-api-depl
+  namespace: dev # Deploys Deployment controller into 'dev' namespace
+  labels:
+    app.kubernetes.io/name: color-api
+spec:
+  replicas: 4 # 4 replicas * 200m CPU / 256Mi RAM = 800m CPU / 1Gi RAM requested
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: color-api # Matcher targeting pod template labels
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: color-api
+    spec:
+      containers:
+      - name: color-api
+        image: ultrainstinct21/color-api:1.1.0
+        resources:
+          requests:
+            cpu: "200m"     # 200 millicores (0.2 vCPU) per Pod replica
+            memory: "256Mi" # 256 Mebibytes RAM per Pod replica
+          limits:
+            cpu: "500m"     # 500 millicores (0.5 vCPU) max per Pod replica
+            memory: "512Mi" # 512 Mebibytes RAM max per Pod replica
+        ports:
+        - containerPort: 80

@@ -1,0 +1,39 @@
+# ==============================================================================
+# THEORY: KUBERNETES NAMESPACES
+# ==============================================================================
+# A Namespace is a virtual cluster inside a physical Kubernetes cluster.
+# It provides resource isolation, scope for object names, and access control.
+#
+# KEY CONCEPTS:
+# 1. Isolation: Objects (Pods, Services, Deployments) inside one namespace are
+#    isolated from objects in another namespace by default.
+# 2. Scope: Resource names must be unique within a namespace, but can be duplicated
+#    across different namespaces (e.g., 'color-api' in 'dev' vs 'color-api' in 'prod').
+# 3. Default Namespaces:
+#    - default: Default namespace for objects created without an explicit namespace.
+#    - kube-system: Namespace for objects created by the Kubernetes control plane.
+#    - kube-public: Auto-created namespace readable by all users (cluster info).
+#    - kube-node-lease: Holds Lease objects associated with node heartbeats.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Namespace:
+#    kubectl apply -f dev-ns.yaml
+#
+# 2. List Namespaces:
+#    kubectl get namespaces (or kubectl get ns)
+#
+# 3. Create Namespace imperatively:
+#    kubectl create namespace dev
+#
+# 4. Set current CLI context namespace:
+#    kubectl config set-context --current --namespace=dev
+#
+# 5. Delete Namespace (WARNING: Deletes ALL resources in the namespace!):
+#    kubectl delete namespace dev
+# ==============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev # Name of the virtual cluster environment

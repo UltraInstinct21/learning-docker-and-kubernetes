@@ -1,0 +1,50 @@
+# ==============================================================================
+# THEORY: POD CONTAINER RESOURCE REQUESTS & LIMITS
+# ==============================================================================
+# In Kubernetes, containers declare hardware resource requirements using two fields:
+#
+# 1. REQUESTS (`spec.containers[].resources.requests`):
+#    - Minimum guaranteed CPU and RAM allocated to the container.
+#    - Used by the Kubernetes Scheduler to place the Pod on a Node with available capacity.
+#
+# 2. LIMITS (`spec.containers[].resources.limits`):
+#    - Maximum upper bound on CPU and RAM the container is allowed to consume.
+#    - CPU Limit Exceeded: Container is throttled by CPU bandwidth controller.
+#    - Memory Limit Exceeded: Container is terminated with OOMKilled status.
+#
+# 3. QUALITY OF SERVICE (QoS):
+#    - Since requests != limits (requests: 500m/128Mi, limits: 1/256Mi), Kubernetes
+#      automatically assigns a 'Burstable' QoS class to this Pod.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Deploy Pod:
+#    kubectl apply -f color-api-pod.yaml
+#
+# 2. Inspect Pod QoS Class & Resource Allocations:
+#    kubectl describe pod color-api -n dev
+#
+# 3. Monitor Live Resource Usage (metrics-server required):
+#    kubectl top pod color-api -n dev
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: color-api
+  namespace: dev # Deployed into the dev namespace subject to dev-quota
+  labels:
+    app.kubernetes.io/name: color-api
+spec:
+  containers:
+  - name: color-api
+    image: ultrainstinct21/color-api:1.1.0
+    resources:
+      requests:
+        cpu: "500m"     # Minimum guaranteed CPU: 0.5 Cores (500 millicores)
+        memory: "128Mi" # Minimum guaranteed RAM: 128 Mebibytes
+      limits:
+        cpu: "1"        # Upper limit CPU: 1 Core (1000 millicores)
+        memory: "256Mi" # Upper limit RAM: 256 Mebibytes (OOMKilled if exceeded)
+    ports:
+      - containerPort: 80

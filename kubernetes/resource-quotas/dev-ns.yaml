@@ -1,0 +1,47 @@
+# ==============================================================================
+# THEORY: RESOURCE QUOTAS (DEV NAMESPACE)
+# ==============================================================================
+# A ResourceQuota object (`kind: ResourceQuota`) sets hard limit constraints on
+# aggregate resource consumption across an entire namespace.
+#
+# KEY CONCEPTS:
+# 1. Resource Control: Prevents a single namespace from consuming all CPU/RAM on cluster nodes.
+# 2. Hard Limits (`spec.hard`):
+#    - requests.cpu: Maximum cumulative CPU requested by all running Pods (1 = 1000m).
+#    - requests.memory: Maximum cumulative RAM requested by all running Pods.
+#    - limits.cpu: Upper limit on total maximum CPU allowed to be specified across Pods.
+#    - limits.memory: Upper limit on total maximum RAM allowed to be specified across Pods.
+# 3. Mandatory Pod Resource Declarations:
+#    - Once a ResourceQuota is applied to a namespace, EVERY Pod created in that namespace
+#      MUST explicitly specify `resources.requests` and `resources.limits` for CPU and Memory!
+#    - Any Pod manifest missing resource specs will be rejected by the Kubernetes API server.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Namespace and ResourceQuota:
+#    kubectl apply -f dev-ns.yaml
+#
+# 2. View ResourceQuota status & current usage vs hard limits:
+#    kubectl get resourcequota -n dev
+#    kubectl describe resourcequota dev-quota -n dev
+# ==============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev # Defines the development namespace
+
+---
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-quota
+  namespace: dev # Binds this quota specifically to the 'dev' namespace
+spec:
+  hard:
+    # pods: "4"         # Optional: limit maximum total number of Pods in 'dev'
+    requests.cpu: "1"   # Aggregate CPU requests across all Pods cannot exceed 1 Core (1000m)
+    requests.memory: "1Gi" # Aggregate RAM requests across all Pods cannot exceed 1 GiB
+    limits.cpu: "2"     # Aggregate CPU limits across all Pods cannot exceed 2 Cores (2000m)
+    limits.memory: "2Gi"  # Aggregate RAM limits across all Pods cannot exceed 2 GiB

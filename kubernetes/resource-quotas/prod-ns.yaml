@@ -1,0 +1,43 @@
+# ==============================================================================
+# THEORY: PRODUCTION RESOURCE QUOTA (PROD NAMESPACE)
+# ==============================================================================
+# Production environments typically require higher resource quotas than development
+# environments to accommodate high availability, multi-replica deployments, and heavier traffic loads.
+#
+# KEY CONCEPTS:
+# 1. Multi-Environment Quotas: Allows allocating more hardware capacity to 'prod'
+#    while strictly limiting resource usage in lower environments ('dev', 'test').
+# 2. Hard Limits (`spec.hard`):
+#    - requests.cpu: 2 Cores (2000m)
+#    - requests.memory: 4 GiB
+#    - limits.cpu: 4 Cores (4000m)
+#    - limits.memory: 4 GiB
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Production Namespace and Quota:
+#    kubectl apply -f prod-ns.yaml
+#
+# 2. Inspect Quota Usage in Production:
+#    kubectl describe resourcequota prod-quota -n prod
+# ==============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod # Defines the production namespace
+
+---
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: prod-quota
+  namespace: prod # Binds this quota specifically to the 'prod' namespace
+spec:
+  hard:
+    # pods: "10"        # Optional: limit total Pod count in production
+    requests.cpu: "2"   # Aggregate CPU requests across prod Pods <= 2 Cores (2000m)
+    requests.memory: "4Gi" # Aggregate RAM requests across prod Pods <= 4 GiB
+    limits.cpu: "4"     # Aggregate CPU limits across prod Pods <= 4 Cores (4000m)
+    limits.memory: "4Gi"  # Aggregate RAM limits across prod Pods <= 4 GiB

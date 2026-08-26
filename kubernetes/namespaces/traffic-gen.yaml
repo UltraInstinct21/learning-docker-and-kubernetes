@@ -1,0 +1,46 @@
+# ==============================================================================
+# THEORY: CROSS-NAMESPACE SERVICE DISCOVERY & FQDN DNS RESOLUTION
+# ==============================================================================
+# This manifest creates a traffic generator Pod in the 'default' namespace that
+# communicates across namespace boundaries to a Service running in the 'dev' namespace.
+#
+# CROSS-NAMESPACE DNS SYNTAX (CoreDNS):
+# Format: <service-name>.<namespace>.svc.cluster.local
+#
+# DNS RESOLUTION SCOPE RULES:
+# 1. Same Namespace:
+#    - http://<service-name>
+#    - Example: http://color-api-svc
+#
+# 2. Same Cluster, Different Namespace (Short Form):
+#    - http://<service-name>.<namespace>
+#    - Example: http://color-api-svc.dev
+#
+# 3. Full FQDN (Fully Qualified Domain Name):
+#    - http://<service-name>.<namespace>.svc.cluster.local
+#    - Example: http://color-api-svc.dev.svc.cluster.local/api
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Traffic Generator (deployed in default namespace):
+#    kubectl apply -f traffic-gen.yaml
+#
+# 2. Stream traffic generator logs to verify cross-namespace HTTP responses:
+#    kubectl logs traffic-generator -f
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: traffic-generator
+  # No namespace specified; defaults to the 'default' namespace
+  labels:
+    app: traffic-generator
+spec:
+  containers:
+  - name: traffic-generator
+    image: lmacademy/traffic-generator:1.0.0
+    args:
+      # Cross-namespace target URL addressing 'color-api-svc' in 'dev' namespace
+      - 'color-api-svc.dev.svc.cluster.local/api'
+      - '1' # Request interval delay (in seconds)
