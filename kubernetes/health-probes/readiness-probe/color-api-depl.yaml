@@ -1,0 +1,86 @@
+# ==============================================================================
+# THEORY: KUBERNETES HEALTH PROBES - READINESS PROBE (DEPLOYMENT)
+# ==============================================================================
+# This Deployment demonstrates a Readiness Probe. A Readiness Probe tells
+# Kubernetes whether a container is ready to receive traffic. When a Readiness
+# Probe fails, the Pod is removed from all Service Endpoints (it still runs, but
+# receives no traffic) — ideal for draining a Pod during startup or temporary
+# overload.
+#
+# PURPOSE IN HEALTH-PROBE DEMOS:
+# - 6 replicas of `color-api` are run behind the `color-api-svc` Service.
+# - FAIL_READINESS=true makes /ready return 503 (~50% of the time), so some
+#   Pods become unready and are removed from Service load balancing.
+# - A Startup Probe (/health) gives the container up to ~6s to start before
+#   liveness/readiness checks begin (prevents false kills during slow startup).
+# - Compare against `color-api-svc` to see traffic routed only to Ready Pods.
+#
+# NOTE ON PROBE PLACEMENT:
+# - startupProbe and readinessProbe live INSIDE `spec.template.spec.containers[]`
+#   (at the container level), NOT at the Pod/Deployment spec level.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply Deployment, Service, and Traffic Generator:
+#    kubectl apply -f color-api-depl.yaml
+#    kubectl apply -f color-api-svc.yaml
+#    kubectl apply -f traffic-gen.yaml
+#
+# 2. Watch Pod readiness states (some will show 0/1 or 1/1 ready):
+#    kubectl get pods -l app=color-api-deployment -w
+#
+# 3. Inspect Endpoints — unready Pods are removed automatically:
+#    kubectl get endpoints color-api-svc
+#
+# 4. Test via port-forward to see load balancing across ready pods only:
+#    kubectl port-forward svc/color-api-svc 8080:80
+#    curl http://localhost:8080/api
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: color-api-deployment
+  labels:
+    app.kubernetes.io/name: color-api-deployment
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: color-api-deployment
+  template:
+    metadata:
+      labels:
+        app: color-api-deployment
+    spec:
+      containers:
+        - name: color-api-deployment
+          image: ultrainstinct21/color-api:1.2.1
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "500Mi"
+          env:
+            - name: DELAY_STARTUP
+              value: "false"
+            - name: FAIL_LIVENESS
+              value: "false"
+            - name: FAIL_READINESS
+              value: "true"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 80
+            failureThreshold: 2
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            failureThreshold: 2
+            periodSeconds: 5

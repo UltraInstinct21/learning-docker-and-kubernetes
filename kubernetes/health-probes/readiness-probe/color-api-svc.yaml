@@ -1,0 +1,38 @@
+# ==============================================================================
+# THEORY: KUBERNETES HEALTH PROBES - SERVICE (CLUSTERIP)
+# ==============================================================================
+# This Service exposes the `color-api-deployment` Pods via a ClusterIP. It works
+# hand-in-hand with the Readiness Probe: when a Pod's /ready endpoint fails, the
+# kubelet marks the Pod as unready and the Service Controller removes it from the
+# Endpoints object, so traffic is no longer routed to it.
+#
+# PURPOSE IN HEALTH-PROBE DEMOS:
+# - Selector `app: color-api-deployment` matches the Deployment's Pod labels.
+# - Only Ready Pods appear in `kubectl get endpoints color-api-svc`.
+# - Combine with traffic-gen.yaml to observe load balancing across Ready Pods only.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply the Service:
+#    kubectl apply -f color-api-svc.yaml
+#
+# 2. View Endpoints (only Ready Pods are listed here):
+#    kubectl get endpoints color-api-svc
+#
+# 3. Port-forward and test load balancing:
+#    kubectl port-forward svc/color-api-svc 8080:80
+#    for i in {1..5}; do curl -s http://localhost:8080/api; done
+# ==============================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: color-api-svc
+spec:
+  selector:
+    app: color-api-deployment
+
+  ports:
+    - name: name-of-the-port
+      port: 80
+      targetPort: 80

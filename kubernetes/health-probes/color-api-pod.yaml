@@ -1,0 +1,70 @@
+# ==============================================================================
+# THEORY: KUBERNETES HEALTH PROBES - STARTUP & LIVENESS PROBE (POD)
+# ==============================================================================
+# This Pod demonstrates how Kubernetes uses container probes to manage the
+# lifecycle of an application. Probes are diagnostic checks performed by the
+# kubelet on a container to determine its health and readiness.
+#
+# PURPOSE IN HEALTH-PROBE DEMOS:
+# - The `color-api` microservice exposes three probe endpoints:
+#     * GET /health  -> Liveness probe (is the container alive? restart if not)
+#     * GET /ready   -> Readiness probe (is the container ready to serve traffic?)
+#     * GET /up      -> Startup probe  (has the container finished starting up?)
+# - Probes are commented out in this manifest so you can enable them one at a
+#   time to observe their behavior (CrashLoopBackOff, Pending, etc.).
+# - Environment variables (DELAY_STARTUP, FAIL_LIVENESS) let you force probe
+#   failures to simulate real-world failure scenarios.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply the Pod:
+#    kubectl apply -f color-api-pod.yaml
+#
+# 2. Observe probe events and restarts:
+#    kubectl describe pod color-api-pod
+#    kubectl get pods -w
+#
+# 3. Test the probe endpoints directly (port-forward to localhost):
+#    kubectl port-forward pod/color-api-pod 8080:80
+#    curl http://localhost:8080/health
+#    curl http://localhost:8080/ready
+#
+# 4. Enable a probe by uncommenting its block, then re-apply:
+#    kubectl apply -f color-api-pod.yaml
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: color-api-pod
+  labels:
+    app.kubernetes.io/name: color-api-pod
+spec:
+  containers:
+    - name: color-api-pod
+      image: ultrainstinct21/color-api:1.2.1
+      ports:
+        - containerPort: 80
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "500Mi"
+      env:
+        - name: DELAY_STARTUP
+          value: "false"
+        - name: FAIL_LIVENESS
+          value: "false"
+
+      # startupProbe:
+      #   httpGet:
+      #     path: /health
+      #     port: 80
+      #   failureThreshold: 2
+      #   periodSeconds: 3
+
+      # livenessProbe:
+      #   httpGet:
+      #     path: /health
+      #     port: 80
+      #   failureThreshold: 3
+      #   periodSeconds: 5

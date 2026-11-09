@@ -1,0 +1,72 @@
+# ==============================================================================
+# THEORY: KUBERNETES STORAGE - emptyDir VOLUME (EPHEMERAL STORAGE)
+# ==============================================================================
+# This Pod demonstrates an `emptyDir` volume: a temporary, empty directory that
+# is created when a Pod is assigned to a Node and lives only as long as the Pod
+# runs on that Node. All containers in the Pod can read and write the same
+# emptyDir volume, making it useful for scratch space or sidecar sharing.
+#
+# KEY CHARACTERISTICS:
+# - Ephemeral: Data is LOST when the Pod is deleted or evicted (unlike PersistentVolumes).
+# - Node-scoped: Survives container restarts, but NOT Pod rescheduling to another Node.
+# - Medium: Defaults to disk-backed node storage; set `medium: Memory` for tmpfs (RAM).
+#
+# PURPOSE IN STORAGE DEMOS:
+# - Two containers (`empty-dir-writer`, `empty-dir-reader`) mount the same
+#   `temporary-storage` emptyDir at different paths to show shared scratch space.
+# - `readOnly: true` on the reader mount demonstrates read-only access.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply the Pod:
+#    kubectl apply -f empty-dir-example.yaml
+#
+# 2. Verify both containers and the shared volume mount:
+#    kubectl describe pod empty-dir-demo
+#
+# 3. Exec into a container and inspect the shared file:
+#    kubectl exec -it empty-dir-demo -c empty-dir-writer -- cat /usr/share/temp/hello.txt
+#
+# 4. Delete the Pod and confirm data is gone (ephemeral nature):
+#    kubectl delete pod empty-dir-demo
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: empty-dir-demo
+  labels:
+    name: empty-dir-demo
+spec:
+  containers:
+    - name: empty-dir-writer
+      image: busybox:1.36.1
+      command:
+        - "sh"
+        - "-c"
+        - "echo Hello World > /usr/share/temp/hello.txt ; sleep 3600"
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      volumeMounts:
+        - name: temporary-storage
+          mountPath: /usr/share/temp
+
+    - name: empty-dir-reader
+      image: busybox:1.36.1
+      command:
+        - "sh"
+        - "-c"
+        - "echo Hello World > /usr/share/temp/hello.txt ; sleep 3600"
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      volumeMounts:
+        - name: temporary-storage
+          mountPath: /temp
+          readOnly: true
+  volumes:
+    - name: temporary-storage
+      emptyDir: {}

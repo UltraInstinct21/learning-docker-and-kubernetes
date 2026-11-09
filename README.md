@@ -43,6 +43,8 @@ This repository is structured as an interactive curriculum pairing in-depth theo
 | **08** | **End-to-End Microservices Demo** | Automated load balancing demo with `color-api` microservice and `traffic-generator` | [Read Theory](kubernetes/theory/08-end-to-end-microservices-demo.md) | [`traffic-generator/`](kubernetes/traffic-generator/) |
 | **09** | **Namespaces & Cross-Namespace Communication** | Virtual clusters, scope isolation, CoreDNS FQDN resolution (`<service>.<namespace>.svc.cluster.local`) | [Read Theory](kubernetes/theory/09-namespaces-and-cross-namespace-networking.md) | [`namespaces/`](kubernetes/namespaces/) |
 | **10** | **Resource Requests, Limits & Quotas** | Container CPU/Memory requests & limits, QoS classes (`Guaranteed`, `Burstable`, `BestEffort`), `ResourceQuota` | [Read Theory](kubernetes/theory/10-resource-requests-limits-and-quotas.md) | [`resource-quotas/`](kubernetes/resource-quotas/) |
+| **11** | **Health Probes (Liveness, Readiness & Startup)** | Container health checks, probe types (httpGet/exec/tcpSocket), failure scenarios, Endpoints removal | [Read Theory](kubernetes/theory/11-health-probes-liveness-readiness-startup.md) | [`health-probes/`](kubernetes/health-probes/) |
+| **12** | **Storage: emptyDir, PersistentVolume & PVC** | Ephemeral vs persistent storage, PV/PVC lifecycle, access modes, reclaim policies, nodeAffinity | [Read Theory](kubernetes/theory/12-storage-empty-dir-persistent-volumes.md) | [`storage-and-percistance/`](kubernetes/storage-and-percistance/) |
 
 </details>
 
@@ -76,7 +78,9 @@ This repository is structured as an interactive curriculum pairing in-depth theo
     ├── color-api/                     # Demo Express microservice for service load balancing
     ├── traffic-generator/             # Automated in-cluster traffic generator
     ├── namespaces/                    # Namespace creation, context switching & cross-namespace DNS
-    └── resource-quotas/               # CPU/RAM requests, limits, QoS & namespace ResourceQuotas
+    ├── resource-quotas/               # CPU/RAM requests, limits, QoS & namespace ResourceQuotas
+    ├── health-probes/                 # Liveness, Readiness & Startup probe demonstrations
+    └── storage-and-percistance/       # emptyDir, PersistentVolume & PersistentVolumeClaim demos
 ```
 
 ---

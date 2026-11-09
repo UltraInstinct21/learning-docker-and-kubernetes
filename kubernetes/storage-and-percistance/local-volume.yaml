@@ -1,0 +1,102 @@
+# ==============================================================================
+# THEORY: KUBERNETES STORAGE - PersistentVolume, PersistentVolumeClaim & Pod
+# ==============================================================================
+# This manifest demonstrates persistent (non-ephemeral) storage using a
+# `PersistentVolume` (PV), a `PersistentVolumeClaim` (PVC), and a Pod that
+# consumes the claim. Unlike emptyDir, data survives Pod deletion and
+# rescheduling because it is backed by real node storage.
+#
+# COMPONENTS:
+# 1. PersistentVolume (local-volume)          -> Cluster-wide storage resource (1Gi).
+#    - volumeMode: Filesystem, accessMode: ReadWriteOnce (single node).
+#    - reclaimPolicy: Retain (volume kept after PVC is deleted).
+#    - nodeAffinity: Pins volume to the 'minikube' node (/mnt/disks/local1).
+# 2. PersistentVolumeClaim (local-volume-claim) -> Namespace-scoped request for storage.
+#    - Binds to a matching PV; consumed by the Pod.
+# 3. Pod (empty-dir-demo)                    -> Workload mounting the claim.
+#    - Mounts the PVC at /mnt/disks/local1 so data persists across restarts.
+#
+# PURPOSE IN STORAGE DEMOS:
+# - Shows the PV -> PVC -> Pod binding workflow for stateful workloads.
+# - Contrast with emptyDir-example.yaml (ephemeral, lost on Pod delete).
+# - nodeAffinity ensures the Pod schedules on the node holding the local disk.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply PV, PVC, and Pod:
+#    kubectl apply -f local-volume.yaml
+#
+# 2. Check PV/PVC binding status (should show Bound):
+#    kubectl get pv,pvc
+#
+# 3. Describe the PersistentVolume (see nodeAffinity & capacity):
+#    kubectl describe pv local-volume
+#
+# 4. Confirm the Pod is using the mounted volume:
+#    kubectl describe pod empty-dir-demo
+# ==============================================================================
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-volume
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/disks/local1
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values: ['minikube']
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-volume-claim
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: empty-dir-demo
+  labels:
+    name: empty-dir-demo
+spec:
+  containers:
+    - name: local-vol
+      image: busybox:1.36.1
+      command:
+        - "sh"
+        - "-c"
+        - "echo Hello World > /usr/share/temp/hello.txt ; sleep 3600"
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      volumeMounts:
+        - name : local-volume
+          mountPath: /mnt/disks/local1
+  volumes:
+    - name : local-volume
+      persistentVolumeClaim:
+        claimName: local-volume-claim        
+
+

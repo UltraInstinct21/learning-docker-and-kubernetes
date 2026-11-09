@@ -1,0 +1,43 @@
+# ==============================================================================
+# THEORY: KUBERNETES HEALTH PROBES - TRAFFIC GENERATOR (POD)
+# ==============================================================================
+# This Pod generates continuous HTTP traffic against the `color-api-svc` Service.
+# It is used to observe how Kubernetes load-balances requests across Ready Pods
+# and how Readiness Probe failures remove Pods from the Service Endpoints.
+#
+# PURPOSE IN HEALTH-PROBE DEMOS:
+# - Image `ultrainstinct21/traffic-gen:1.0.0` repeatedly curls the target URL.
+# - Args: "color-api-svc/api" (target service path) and "0.5" (delay between requests).
+# - Run alongside color-api-depl.yaml + color-api-svc.yaml to see live load balancing.
+# - When Readiness Probes mark some Pods unready, traffic is automatically
+#   redirected to the remaining Ready Pods.
+#
+# USEFUL CLI COMMANDS:
+# ------------------------------------------------------------------------------
+# 1. Apply the traffic generator:
+#    kubectl apply -f traffic-gen.yaml
+#
+# 2. Stream its logs to observe which backend pods receive traffic:
+#    kubectl logs -f traffic-gen
+#
+# 3. Correlate with Endpoints to confirm only Ready Pods are hit:
+#    kubectl get endpoints color-api-svc
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: traffic-gen
+  labels:
+    app.kubernetes.io/name: traffic-gen
+spec:
+  containers:
+    - name: traffic-gen
+      image: ultrainstinct21/traffic-gen:1.0.0
+      args:
+        - "color-api-svc/api"
+        - "0.5"
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
